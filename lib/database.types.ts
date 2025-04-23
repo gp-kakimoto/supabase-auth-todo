@@ -58,23 +58,31 @@ export type Database = {
         }
         Relationships: []
       }
-      todo: {
+      todos: {
         Row: {
-          data: string | null
-          number: number
-          user_id: string | null
+          id: number
+          task: string | null
+          user_id: string
         }
         Insert: {
-          data?: string | null
-          number?: number
-          user_id?: string | null
+          id?: never
+          task?: string | null
+          user_id: string
         }
         Update: {
-          data?: string | null
-          number?: number
-          user_id?: string | null
+          id?: never
+          task?: string | null
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "todos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

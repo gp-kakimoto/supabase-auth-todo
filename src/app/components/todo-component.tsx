@@ -1,28 +1,48 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Todo } from "../utils/interfaces";
-import { addTodo, deleteTodo, getAllTodos } from "../utils/supabasefunctions";
+import { useState } from "react";
+import { deleteTodo, editTodo, getAllTodos } from "../utils/supabasefunctions";
+import { Tables } from "../../../lib/database.types";
+type Todo = Tables<"todos">;
 type Props = {
   todos: Todo[];
   todo: Todo;
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
-  key: number;
 };
 const TodoComponent = (props: Props) => {
-  const { todos, setTodos, todo, key } = props;
-  const [text, setText] = useState("");
-  const [hasError, setHasError] = useState<boolean>(false);
-  //const [todos, setTodos] = useState<Todo[]>([]);
+  const { todos, setTodos, todo } = props;
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isSaveText, setIsSaveText] = useState(todo.task);
   const router = useRouter();
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
   };
 
+  const handleIsSaveText = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setIsSaveText(e.target.value);
+  };
+
   const handleSave = async () => {
-    setIsEditing(!isEditing);
+    try {
+      const error = await editTodo(todo.id, todo.user_id, isSaveText);
+      if (error) {
+        console.log("エラーが発生しました。");
+
+        return;
+      }
+    } catch (error) {
+      return;
+    }
+
+    setTodos((oldTodos) => [
+      ...oldTodos,
+      { id: todo.id, user_id: todo.user_id, task: isSaveText },
+      ...oldTodos,
+    ]);
+    handleEdit();
   };
   const handleDelete = async (number: number) => {
     try {
@@ -45,19 +65,22 @@ const TodoComponent = (props: Props) => {
     } catch (error) {
       return;
     }
-    router.refresh();
   };
 
   return (
-    <li
-      key={todo.number}
-      className="bg-green-400 mx-2 w-[410px] flex justify-between break-woards border-b 2px border-l 4px"
-    >
-      <span className="break-words w-[330px]">{todo.data}</span>
+    <li className="bg-green-400 mx-2 w-[410px] flex justify-between break-woards border-b 2px border-l 4px">
+      {!isEditing && <span className="break-words w-[330px]">{todo.task}</span>}
       {isEditing && (
-        <button className="bg-red-300 rounded-2xl" onClick={() => handleSave()}>
-          SAVE
-        </button>
+        <form className="flex" onSubmit={(e) => handleSave()}>
+          <input
+            id={"save"}
+            name={"save"}
+            onChange={handleIsSaveText}
+            value={isSaveText ? isSaveText : ""}
+            className="bg-gray-300 w-[330px] mx-0 px-0"
+          />
+          <button className="bg-red-300 rounded-2xl">SAVE</button>
+        </form>
       )}
       {!isEditing && (
         <button className="bg-red-300 rounded-2xl" onClick={() => handleEdit()}>
@@ -66,7 +89,7 @@ const TodoComponent = (props: Props) => {
       )}
       <button
         className="bg-red-300 rounded-2xl"
-        onClick={() => handleDelete(todo.number)}
+        onClick={() => handleDelete(todo.id)}
       >
         DELETE
       </button>

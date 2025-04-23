@@ -1,14 +1,14 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Todo } from "../utils/interfaces";
-import { addTodo, deleteTodo, getAllTodos } from "../utils/supabasefunctions";
+import { Tables } from "../../../lib/database.types";
+import { addTodo, getAllTodos } from "../utils/supabasefunctions";
 import TodoComponent from "@/app/components/todo-component";
 type Props = {
-  //todos: Todo[] | null;
   user_id: string;
 };
 const TodoApp = (props: Props) => {
+  type Todo = Tables<"todos">;
   const { user_id } = props;
   const [text, setText] = useState("");
   const [hasError, setHasError] = useState<boolean>(false);
@@ -21,7 +21,7 @@ const TodoApp = (props: Props) => {
       if (tmp) setTodos(tmp);
     };
     fetchData();
-  }, []);
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,9 +41,6 @@ const TodoApp = (props: Props) => {
     }
     setHasError(false);
     setText("");
-    // setTodos(oldTodo => [...oldTodo,isSucsess]);
-    console.log("refresh");
-    //router.refresh();
   };
   const handleText = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -78,7 +75,7 @@ const TodoApp = (props: Props) => {
                 todos={todos}
                 todo={todo}
                 setTodos={setTodos}
-                key={todo.number}
+                key={todo.id}
               />
             ))
           ) : (
