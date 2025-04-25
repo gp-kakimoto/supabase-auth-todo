@@ -1,6 +1,6 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+//import { useRouter } from "next/navigation";
+import { FormEventHandler, useState } from "react";
 import { deleteTodo, editTodo, getAllTodos } from "../utils/supabasefunctions";
 import { Tables } from "../../../lib/database.types";
 type Todo = Tables<"todos">;
@@ -13,7 +13,7 @@ const TodoComponent = (props: Props) => {
   const { todos, setTodos, todo } = props;
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isSaveText, setIsSaveText] = useState(todo.task);
-  const router = useRouter();
+  //const router = useRouter();
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
@@ -25,23 +25,30 @@ const TodoComponent = (props: Props) => {
     setIsSaveText(e.target.value);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     try {
+      if (isSaveText === todo.task) {
+        handleEdit();
+        return;
+      }
       const error = await editTodo(todo.id, todo.user_id, isSaveText);
       if (error) {
         console.log("エラーが発生しました。");
-
+        handleEdit();
         return;
       }
     } catch (error) {
       return;
     }
 
-    setTodos((oldTodos) => [
-      ...oldTodos,
-      { id: todo.id, user_id: todo.user_id, task: isSaveText },
-      ...oldTodos,
-    ]);
+    setTodos((oldTodos) =>
+      oldTodos.map((oldTodo) =>
+        oldTodo.id === todo.id
+          ? { id: todo.id, user_id: todo.user_id, task: isSaveText }
+          : oldTodo
+      )
+    );
     handleEdit();
   };
   const handleDelete = async (number: number) => {
@@ -71,7 +78,7 @@ const TodoComponent = (props: Props) => {
     <li className="bg-green-400 mx-2 w-[410px] flex justify-between break-woards border-b 2px border-l 4px">
       {!isEditing && <span className="break-words w-[330px]">{todo.task}</span>}
       {isEditing && (
-        <form className="flex" onSubmit={(e) => handleSave()}>
+        <form className="flex" onSubmit={(e) => handleSave(e)}>
           <input
             id={"save"}
             name={"save"}

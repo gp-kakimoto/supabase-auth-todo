@@ -38,5 +38,5 @@ export const deleteTodo = async (id: number) => {
         .update({task:task })
         .eq("id", id)
         .select();
-    return (!error)? data : null;
+    return (!!!error)? null : data;
 }
