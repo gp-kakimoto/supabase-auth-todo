@@ -40,3 +40,12 @@ export const deleteTodo = async (id: number) => {
         .select();
     return (!!!error)? null : data;
 }
+
+export const editTodo_test = async (id:number,user_id:string,task:string|null) =>{
+  const { data,error } = await supabase
+      .from('todos')
+      .update({task:task ,user_id:'fake_id'})
+      .eq("id", id)
+      .select();
+  return (!!!error)? null : data;
+}

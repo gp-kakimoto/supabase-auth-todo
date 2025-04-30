@@ -1,13 +1,24 @@
 "use client";
 //import { useRouter } from "next/navigation";
-import { FormEventHandler, useState } from "react";
-import { deleteTodo, editTodo, getAllTodos } from "../utils/supabasefunctions";
+import {
+  Dispatch,
+  SetStateAction,
+  ChangeEvent,
+  FormEvent,
+  useState,
+} from "react";
+import {
+  deleteTodo,
+  editTodo,
+  // editTodo_test,
+  getAllTodos,
+} from "../utils/supabasefunctions";
 import { Tables } from "../../../lib/database.types";
 type Todo = Tables<"todos">;
 type Props = {
   todos: Todo[];
   todo: Todo;
-  setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
+  setTodos: Dispatch<SetStateAction<Todo[]>>;
 };
 const TodoComponent = (props: Props) => {
   const { todos, setTodos, todo } = props;
@@ -20,12 +31,12 @@ const TodoComponent = (props: Props) => {
   };
 
   const handleIsSaveText = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setIsSaveText(e.target.value);
   };
 
-  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       if (isSaveText === todo.task) {
@@ -33,6 +44,7 @@ const TodoComponent = (props: Props) => {
         return;
       }
       const error = await editTodo(todo.id, todo.user_id, isSaveText);
+      // const error = await editTodo_test(todo.id, todo.user_id, isSaveText);
       if (error) {
         console.log("エラーが発生しました。");
         handleEdit();
@@ -76,7 +88,7 @@ const TodoComponent = (props: Props) => {
 
   return (
     <li className="bg-green-400 mx-2 w-[410px] flex justify-between break-woards border-b 2px border-l 4px">
-      {!isEditing && <span className="break-words w-[330px]">{todo.task}</span>}
+      {!isEditing && <span className="break-words w-[290px]">{todo.task}</span>}
       {isEditing && (
         <form className="flex" onSubmit={(e) => handleSave(e)}>
           <input
@@ -84,7 +96,7 @@ const TodoComponent = (props: Props) => {
             name={"save"}
             onChange={handleIsSaveText}
             value={isSaveText ? isSaveText : ""}
-            className="bg-gray-300 w-[330px] mx-0 px-0"
+            className="bg-gray-300 w-[290px] mx-0 px-0"
           />
           <button className="bg-red-300 rounded-2xl">SAVE</button>
         </form>
