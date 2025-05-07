@@ -25,23 +25,28 @@ const TodoApp = (props: Props) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const isSucsess = await addTodo(user_id, text);
-      console.log(`isSucsess=`, isSucsess);
-      if (!isSucsess) {
-        setHasError(true);
-        console.log("is Not Sucsess");
-        return;
-      }
-      setTodos((oldTodo) => [isSucsess, ...oldTodo]);
-    } catch (error) {
+    if (!text.trim()) {
       setHasError(true);
-      console.log("error");
+      console.error("入力が空です。");
       return;
     }
-    setHasError(false);
-    setText("");
+    try {
+      const newTodo = await addTodo(user_id, text);
+
+      if (!newTodo) {
+        setHasError(true);
+        console.error("Todoの追加に失敗しました。");
+        return;
+      }
+      setTodos((oldTodo) => [newTodo, ...oldTodo]);
+      setText("");
+      setHasError(false);
+    } catch (error) {
+      setHasError(true);
+      console.error("エラーが発生しました。", error);
+    }
   };
+
   const handleText = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
