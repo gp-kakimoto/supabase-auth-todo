@@ -21,7 +21,7 @@ const TodoApp = (props: Props) => {
       if (tmp) setTodos(tmp);
     };
     fetchData();
-  });
+  }, [user_id]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,9 +38,11 @@ const TodoApp = (props: Props) => {
         console.error("Todoの追加に失敗しました。");
         return;
       }
-      setTodos((oldTodo) => [newTodo, ...oldTodo]);
+      //setTodos((oldTodo) => [newTodo, ...oldTodo]);
+      setTodos((oldtodos) => [newTodo, ...oldtodos]);
       setText("");
       setHasError(false);
+      //router.refresh();
     } catch (error) {
       setHasError(true);
       console.error("エラーが発生しました。", error);
@@ -62,13 +64,21 @@ const TodoApp = (props: Props) => {
           onSubmit={(e) => handleSubmit(e)}
         >
           <input
+            aria-label="ToDo"
+            type="text"
             id={"ToDo"}
             name={"ToDo"}
             value={text ? text : ""}
             onChange={handleText}
             className="bg-gray-300 w-[340px] mx-0 px-0"
           />
-          <button className="shadow-md border-2 px-1 py-1 rounded-lg bg-blue-200 max-w-[80px]">
+
+          <button
+            aria-label="ADD"
+            id={"ADD"}
+            name={"ADD"}
+            className="shadow-md border-2 px-1 py-1 rounded-lg bg-blue-200 max-w-[80px]"
+          >
             ADD
           </button>
         </form>

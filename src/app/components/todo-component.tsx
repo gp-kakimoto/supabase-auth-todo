@@ -85,6 +85,7 @@ const TodoComponent = (props: Props) => {
       ) : (
         <form className="flex" onSubmit={(e) => handleSave(e)}>
           <input
+            aria-label="save"
             id={"save"}
             name={"save"}
             onChange={handleInputChange}
@@ -96,6 +97,11 @@ const TodoComponent = (props: Props) => {
       )}
 
       <button
+        aria-label="DELETE"
+        id={"DELETE"}
+        name={"DELETE"}
+        type={"button"}
+        role="button"
         className="bg-red-300 rounded-2xl"
         onClick={() => handleDelete(todo.id)}
       >

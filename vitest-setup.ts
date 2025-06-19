@@ -3,10 +3,10 @@ import "@testing-library/jest-dom/vitest";
 import { vi } from 'vitest';
 
 vi.mock('@supabase/auth-helpers-nextjs', () => {
-  let todos = [
+ let todos = [
     { id: 1, user_id: "test", task: "test task" }
   ];
- 
+
 const fakeClient = {
   from: () => ({
     select: () => ({
