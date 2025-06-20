@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import TodoApp from "../todoApp";
 import userEvent from "@testing-library/user-event";
 import * as supabaseFunctions from "../../utils/supabasefunctions";
@@ -32,6 +32,8 @@ describe("TodoApp", () => {
   const user = userEvent.setup();
 
   beforeEach(() => {
+    vi.clearAllMocks(); // 追加
+
     (supabaseFunctions.getAllTodos as any).mockResolvedValue(mockTodos);
     (supabaseFunctions.addTodo as any).mockResolvedValue({
       id: 3,
@@ -113,5 +115,107 @@ describe("TodoApp", () => {
       expect(screen.getByText("編集後タスク")).toBeInTheDocument();
       expect(screen.queryByText("タスク1")).not.toBeInTheDocument();
     });
+  });
+
+  it("入力が空の場合はタスクが追加されずエラーメッセージが表示される", async () => {
+    render(<TodoApp user_id="test" />);
+    const input = screen.getByRole("textbox", { name: "ToDo" });
+    const button = screen.getByRole("button", { name: "ADD" });
+
+    // 入力を空にして送信
+    await userEvent.clear(input);
+    await userEvent.click(button);
+
+    // addTodoは呼ばれない
+    expect(supabaseFunctions.addTodo).not.toHaveBeenCalled();
+
+    // エラーメッセージが表示される
+    await waitFor(() => {
+      expect(
+        screen.getByText("Todoの追加に失敗しました。")
+      ).toBeInTheDocument();
+    });
+  });
+  it('textが空白や空文字の場合にconsole.error("入力が空です。")が呼ばれる', async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    render(<TodoApp user_id="test" />);
+    const input = screen.getByRole("textbox", { name: "ToDo" });
+    const button = screen.getByRole("button", { name: "ADD" });
+
+    // 空文字の場合
+    await userEvent.clear(input);
+    await userEvent.click(button);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith("入力が空です。");
+
+    // 空白のみの場合
+    await userEvent.type(input, "   ");
+    await userEvent.click(button);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith("入力が空です。");
+
+    consoleErrorSpy.mockRestore();
+  });
+  it('addTodoがnullを返した場合にconsole.error("Todoの追加に失敗しました。")が呼ばれる', async () => {
+    // addTodoがnullを返すようにモック
+    (supabaseFunctions.addTodo as any).mockResolvedValueOnce(null);
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    render(<TodoApp user_id="test" />);
+    const input = screen.getByRole("textbox", { name: "ToDo" });
+    const button = screen.getByRole("button", { name: "ADD" });
+
+    await userEvent.type(input, "テストタスク");
+    await userEvent.click(button);
+
+    expect(supabaseFunctions.addTodo).toHaveBeenCalledWith(
+      "test",
+      "テストタスク"
+    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Todoの追加に失敗しました。");
+
+    // エラーメッセージが表示されることも確認
+    await waitFor(() => {
+      expect(
+        screen.getByText("Todoの追加に失敗しました。")
+      ).toBeInTheDocument();
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('addTodoで例外が発生した場合にconsole.error("エラーが発生しました。", error)が呼ばれ、エラーメッセージが表示される', async () => {
+    const error = new Error("サーバーエラー");
+    (supabaseFunctions.addTodo as any).mockRejectedValueOnce(error);
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    render(<TodoApp user_id="test" />);
+    const input = screen.getByRole("textbox", { name: "ToDo" });
+    const button = screen.getByRole("button", { name: "ADD" });
+
+    await userEvent.type(input, "例外テスト");
+    await userEvent.click(button);
+
+    expect(supabaseFunctions.addTodo).toHaveBeenCalledWith(
+      "test",
+      "例外テスト"
+    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "エラーが発生しました。",
+      error
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Todoの追加に失敗しました。")
+      ).toBeInTheDocument();
+    });
+    consoleErrorSpy.mockRestore();
   });
 });

@@ -17,6 +17,7 @@ const fakeClient = {
         })
       })
     }),
+  /*  
     insert: (rows:{user_id: string, task:string}[]) => ({
       select: () => ({    
           single: () => ({
@@ -31,6 +32,22 @@ const fakeClient = {
         
       })
     }),
+   */
+insert: function(rows:{user_id: string, task:string}[]) {
+  return {
+    select: () => ({
+      single: () => ({
+        data: (() => {
+          const { user_id, task } = rows[0];
+          const newTodo = { id: todos.length +1, user_id, task };
+          todos.unshift(newTodo);
+          return newTodo;
+        })(),
+        error: null
+      })
+    })
+  }
+},
     update: ({task}:{task:string}) => ({
         eq: (user_id:string,id:number) => ({
             select: () => ({

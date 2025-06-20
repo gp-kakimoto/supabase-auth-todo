@@ -6,6 +6,10 @@ vi.mock('../utils/supabase', () => ({
 import { addTodo, getAllTodos, deleteTodo, editTodo } from '../supabasefunctions';
 
 describe('supabasefunctions', () => {
+    beforeEach(() => {
+    vi.clearAllMocks(); // 追加
+    });
+
   it('addTodo: 正常にTodoを追加できる', async () => {
    const todo = await addTodo('test','test add task');
     expect(todo).toBeDefined();
@@ -29,4 +33,16 @@ describe('supabasefunctions', () => {
     expect(result).toBe(true);
   });
   
+
+  it('addTodo: エラー時はnullを返す', async () => {
+    vi.spyOn(supabase.from('todos'), 'insert').mockReturnValueOnce({
+      select: () => ({
+        single: () => ({ data: null, error: { message: 'insert error' } })
+      })
+    } as any);
+
+    const todo = await addTodo('test', 'test add task');
+    expect(todo).toBeNull();
+  });
+
 });
