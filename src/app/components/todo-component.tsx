@@ -35,10 +35,10 @@ const TodoComponent = (props: Props) => {
     }
 
     try {
-      const error = await editTodo(todo.id, todo.user_id, isSaveText);
+      const isSuccess = await editTodo(todo.id, todo.user_id, isSaveText);
 
-      if (!error) {
-        console.error("エラーが発生しました。", error);
+      if (!isSuccess) {
+        console.error("エラーが発生しました。", isSuccess);
 
         return;
       }
@@ -55,9 +55,9 @@ const TodoComponent = (props: Props) => {
   };
   const handleDelete = async (number: number) => {
     try {
-      const error = await deleteTodo(number);
-      if (!error) {
-        console.error("エラーが発生しました。", error);
+      const isSuccess = await deleteTodo(number);
+      if (!isSuccess) {
+        console.error("エラーが発生しました。", isSuccess);
         return;
       }
 
