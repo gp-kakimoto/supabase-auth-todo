@@ -4,7 +4,7 @@ import { addTodo, getAllTodos, deleteTodo, editTodo } from '../supabasefunctions
 
 describe('supabasefunctions', () => {
     beforeEach( () => {
-      vi.clearAllMocks(); // 追加
+      vi.clearAllMocks(); 
 
     });
 
@@ -35,18 +35,89 @@ describe('supabasefunctions', () => {
     expect(result).toBe(true);
   });
   
-it('addTodo: エラー時はnullを返す', async () => {
-  vi.spyOn(supabase, 'from').mockReturnValue({
-    insert: () => ({
+  it('getAllTodos: エラー時はnullを返す', async () => {
+    vi.spyOn(supabase, 'from').mockReturnValue({
       select: () => ({
-        single: () => ({ data: null, error: { message: 'insert error' } })
+        eq: () => ({
+          order: () => ({
+            data: null, error: { message: 'fetch error' } })
+          })
+        })
+      } as any);
+
+    const todos = await getAllTodos('test');
+    expect(todos).toBeNull();
+  });
+
+  it('addTodo: エラー時はnullを返す', async () => {
+    vi.spyOn(supabase, 'from').mockReturnValue({
+      insert: () => ({
+        select: () => ({
+          single: () => ({ data: null, error: { message: 'insert error' } })
+        })
       })
-    })
-  } as any);
+    } as any);
 
-  const todo = await addTodo('test', 'test add task');
-  expect(todo).toBeNull();
-});
+    const todo = await addTodo('test', 'test add task');
+    expect(todo).toBeNull();
+  });
 
+  it('deleteTodo: エラー時はfalseを返す', async () => {
+    vi.spyOn(supabase, 'from').mockReturnValue({
+      delete: () => ({
+        eq: () => ({ error: { message: 'delete error' } })
+      })
+    } as any);
 
+    const result = await deleteTodo(1);
+    expect(result).toBe(false);
+  });
+
+  it('editTodo: エラー時はnullを返す', async () => {
+    vi.spyOn(supabase, 'from').mockReturnValue({
+      update: () => ({
+        eq: () => ({
+          select: () => ({
+            single: () => ({ data: null, error: { message: 'update error' } })
+          })
+        })
+      })
+    } as any);
+
+    const todo = await editTodo(1, 'updated task');
+    expect(todo).toBeNull();
+  });
+
+  //以下例外発生時のテスト
+  it('getAllTodos: 例外発生時はnullを返す', async () => {
+    vi.spyOn(supabase, 'from').mockImplementation(() => {
+      throw new Error('unexpected error');
+    });
+    const todos = await getAllTodos('test');
+    expect(todos).toBeNull();
+  });
+
+  it('addTodo: 例外発生時はnullを返す', async () => {
+    vi.spyOn(supabase, 'from').mockImplementation(() => {
+      throw new Error('unexpected error');
+    });
+    const todo = await addTodo('test', 'test add task');
+    expect(todo).toBeNull();
+  });
+
+  it('deleteTodo: 例外発生時はfalseを返す', async () => {
+    vi.spyOn(supabase, 'from').mockImplementation(() => {
+      throw new Error('unexpected error');
+    });
+    const result = await deleteTodo(1);
+    expect(result).toBe(false);
+  });
+
+  it('editTodo: 例外発生時はnullを返す', async () => {
+    vi.spyOn(supabase, 'from').mockImplementation(() => {
+      throw new Error('unexpected error');
+    });
+    const todo = await editTodo(1, 'updated task');
+    expect(todo).toBeNull();
+  });
 });
