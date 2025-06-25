@@ -93,7 +93,7 @@ describe("TodoComponent", () => {
 
     expect(editTodo).toHaveBeenCalledWith(
       mockTodo.id,
-      mockTodo.user_id,
+      //mockTodo.user_id,
       "更新されたタスク"
     );
     expect(mockSetTodos).toHaveBeenCalled();

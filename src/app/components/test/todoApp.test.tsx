@@ -43,7 +43,7 @@ describe("TodoApp", () => {
     (supabaseFunctions.deleteTodo as any).mockResolvedValue(true);
     (supabaseFunctions.editTodo as any).mockResolvedValue({
       id: 1,
-      user_id: "test",
+      //user_id: "test",
       task: "編集後タスク",
     });
   });
@@ -108,7 +108,7 @@ describe("TodoApp", () => {
 
     expect(supabaseFunctions.editTodo).toHaveBeenCalledWith(
       1,
-      "test",
+      //"test",
       "編集後タスク"
     );
     await waitFor(() => {

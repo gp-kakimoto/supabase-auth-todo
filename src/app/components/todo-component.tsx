@@ -35,7 +35,7 @@ const TodoComponent = (props: Props) => {
     }
 
     try {
-      const isSuccess = await editTodo(todo.id, todo.user_id, isSaveText);
+      const isSuccess = await editTodo(todo.id, /*todo.user_id,*/ isSaveText);
 
       if (!isSuccess) {
         console.error("エラーが発生しました。", isSuccess);

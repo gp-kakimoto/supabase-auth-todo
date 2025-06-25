@@ -1,17 +1,19 @@
 import { describe, it, expect, vi } from 'vitest';
-import  {supabase } from '../../utils/test/mocks/supabase';
-vi.mock('../utils/supabase', () => ({
-  supabase:supabase,
-}));
+import  {supabase } from '../../utils/supabase';
 import { addTodo, getAllTodos, deleteTodo, editTodo } from '../supabasefunctions';
 
 describe('supabasefunctions', () => {
-    beforeEach(() => {
-    vi.clearAllMocks(); // 追加
+    beforeEach( () => {
+      vi.clearAllMocks(); // 追加
+
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
     });
 
   it('addTodo: 正常にTodoを追加できる', async () => {
-   const todo = await addTodo('test','test add task');
+    const todo = await addTodo('test','test add task');
     expect(todo).toBeDefined();
     expect(todo?.task).toBe('test add task');
   });
@@ -23,7 +25,7 @@ describe('supabasefunctions', () => {
   
   
     it('editTodo: Todoを編集できる', async () => {
-      const todo = await editTodo(1, 'test', 'updated task');
+      const todo = await editTodo(1, 'updated task');
       expect(todo).toBeDefined();
       expect(todo?.task).toBe('updated task');
     });
@@ -33,16 +35,18 @@ describe('supabasefunctions', () => {
     expect(result).toBe(true);
   });
   
-
-  it('addTodo: エラー時はnullを返す', async () => {
-    vi.spyOn(supabase.from('todos'), 'insert').mockReturnValueOnce({
+it('addTodo: エラー時はnullを返す', async () => {
+  vi.spyOn(supabase, 'from').mockReturnValue({
+    insert: () => ({
       select: () => ({
         single: () => ({ data: null, error: { message: 'insert error' } })
       })
-    } as any);
+    })
+  } as any);
 
-    const todo = await addTodo('test', 'test add task');
-    expect(todo).toBeNull();
-  });
+  const todo = await addTodo('test', 'test add task');
+  expect(todo).toBeNull();
+});
+
 
 });

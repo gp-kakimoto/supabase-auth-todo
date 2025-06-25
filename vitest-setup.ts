@@ -17,7 +17,7 @@ const fakeClient = {
         })
       })
     }),
-  /*  
+    
     insert: (rows:{user_id: string, task:string}[]) => ({
       select: () => ({    
           single: () => ({
@@ -32,34 +32,30 @@ const fakeClient = {
         
       })
     }),
-   */
-insert: function(rows:{user_id: string, task:string}[]) {
-  return {
+   
+update: ({task}:{task:string}) => ({
+  eq: ( key:string, id:number) => ({
     select: () => ({
-      single: () => ({
-        data: (() => {
-          const { user_id, task } = rows[0];
-          const newTodo = { id: todos.length +1, user_id, task };
-          todos.unshift(newTodo);
-          return newTodo;
-        })(),
-        error: null
-      })
+      single: () => {
+        const idx = todos.findIndex(todo => todo.id === id);
+        if (idx !== -1 && task !== undefined) {
+          todos[idx].task = task;
+          return {
+            data: todos[idx],
+            error: null
+          };
+        }
+        return {
+          data: undefined,
+          error: { message: "not found" }
+        };
+      }
     })
-  }
-},
-    update: ({task}:{task:string}) => ({
-        eq: (user_id:string,id:number) => ({
-            select: () => ({
-                data: (() => {
-            const idx = todos.findIndex(todo => todo.id === id);
-            if (idx !== -1 && task !== undefined) todos[idx].task =task;
-            return [todos[idx]];
-          })(),
-          error: null
-        })
-      })
-    }),
+  })
+}),
+
+
+
     delete: () => ({
       eq: ({ id }: { id: number }) => {
         todos = todos.filter(todo => todo.id !== id);
