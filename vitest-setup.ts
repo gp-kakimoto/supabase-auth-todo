@@ -54,9 +54,7 @@ update: ({task}:{task:string}) => ({
   })
 }),
 
-
-
-    delete: () => ({
+delete: () => ({
       eq: ({ id }: { id: number }) => {
         todos = todos.filter(todo => todo.id !== id);
         return { error: null };

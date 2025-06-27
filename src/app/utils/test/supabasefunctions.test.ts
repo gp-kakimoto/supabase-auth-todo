@@ -120,4 +120,15 @@ describe('supabasefunctions', () => {
     const todo = await editTodo(1, 'updated task');
     expect(todo).toBeNull();
   });
+
+
+  //　例外発生時のエラーハンドリング関数のテスト 文字列がnullだった場合のテスト
+  it('handleError: エラーメッセージがnullだった場合、"Error"と表示される', async() => {
+    // addTodoのエラーハンドリングを用いてテスト
+     vi.spyOn(supabase, 'from').mockImplementation(() => {
+      throw new Error();
+    });
+    const todo = await addTodo('test', 'test add task');
+    expect(todo).toBeNull();    
+  });
 });
